@@ -127,7 +127,7 @@ private fun Header(state: UiState) {
     ) {
         Column(Modifier.weight(1f)) {
             Text("HERMES // ORCA", color = AppColors.White, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-            Text("NATIVE DESK // v0.2", color = AppColors.Faint, fontFamily = FontFamily.Monospace)
+            Text("NATIVE DESK // v0.3", color = AppColors.Faint, fontFamily = FontFamily.Monospace)
         }
         StatusPill(
             text = when {

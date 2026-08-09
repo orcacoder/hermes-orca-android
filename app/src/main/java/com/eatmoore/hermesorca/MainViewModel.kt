@@ -2,6 +2,7 @@ package com.eatmoore.hermesorca
 
 import android.app.Application
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
@@ -36,12 +37,23 @@ data class UiState(
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val prefs = app.getSharedPreferences("hermes_orca", 0)
+    private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, changed ->
+        if (changed == "api_key" || changed == "base_url") {
+            _state.value = _state.value.copy(
+                apiKey = prefs.getString("api_key", "") ?: "",
+                baseUrl = prefs.getString("base_url", "http://127.0.0.1:8642") ?: "http://127.0.0.1:8642",
+                systemMessage = "Pairing data updated from Termux."
+            )
+            checkHealth()
+        }
+    }
     private val api = HermesApi()
     private val termux = TermuxBridge(app)
 
     private val _state = MutableStateFlow(
         UiState(
             apiKey = prefs.getString("api_key", "") ?: "",
+            baseUrl = prefs.getString("base_url", "http://127.0.0.1:8642") ?: "http://127.0.0.1:8642",
             termuxInstalled = termux.isInstalled(),
             vaultUri = prefs.getString("vault_uri", null)
         )
@@ -49,7 +61,13 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val state: StateFlow<UiState> = _state.asStateFlow()
 
     init {
+        prefs.registerOnSharedPreferenceChangeListener(prefListener)
         checkHealth()
+    }
+
+    override fun onCleared() {
+        prefs.unregisterOnSharedPreferenceChangeListener(prefListener)
+        super.onCleared()
     }
 
     fun saveApiKey(key: String) {
