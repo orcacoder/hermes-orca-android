@@ -1,0 +1,15 @@
+name: Runner Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test runner
+        run: |
+          echo "GITHUB RUNNER OK"
+          uname -a
